@@ -1,5 +1,5 @@
 import numpy as np
-import pyfits
+from astropy.io import fits
 import subprocess
 import sys
 import pandas as pd
@@ -76,13 +76,13 @@ def write_params(params, filename="spiceTEMP_spice_params.txt"):
             f.write("%s = %s\n" % (k, params[k]))
 
 def read_cl(filename="./spiceTEMP_spice_cl.fits"):
-    cl_file = pyfits.open(filename)
+    cl_file = fits.open(filename)
     cl_file[1].verify("fix")
     cl = pd.DataFrame(np.array(cl_file[1].data))
     # convert from string (?!) to float
     cl[cl.keys()] = cl[cl.keys()].astype(np.float32)
     cl.index.name = "ell"
-    return cl
+    return clpy
 
 def compute_llp1(ell):
     return ell * (ell+1) / 2. / np.pi
@@ -92,7 +92,7 @@ def compute_power(ell):
 
 def weighted_average(g):
     weights = compute_power(g.index)
-    return g.mul(weights, axis="index").sum()/weights.sum() 
+    return g.mul(weights, axis="index").sum()/weights.sum()
 
 def bin_cl(cl):
     ctp_binning = pd.read_csv("planck_ctp_bin.csv")
