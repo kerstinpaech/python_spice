@@ -82,7 +82,7 @@ def read_cl(filename="./spiceTEMP_spice_cl.fits"):
     # convert from string (?!) to float
     cl[cl.keys()] = cl[cl.keys()].astype(np.float32)
     cl.index.name = "ell"
-    return clpy
+    return cl
 
 def compute_llp1(ell):
     return ell * (ell+1) / 2. / np.pi
@@ -103,7 +103,7 @@ def bin_cl(cl):
     binned_cl = binned_cl.set_index("ell")
     return binned_cl
 
-def spice(bin=True, norm=True, **kwargs):
+def spice(bin=True, norm=True, keep_tmp_files=False, **kwargs):
     """Run spice (needs to be in PATH)
 
     Parameters
@@ -143,8 +143,9 @@ def spice(bin=True, norm=True, **kwargs):
         print(e.output)
         sys.exit(1)
     cl = read_cl()
-    for f in glob("spiceTEMP*"):
-        os.remove(f)
+    if not keep_tmp_files:
+        for f in glob("spiceTEMP*"):
+            os.remove(f)
     lmax = cl.index.max()
     if bin:
         cl = bin_cl(cl)
